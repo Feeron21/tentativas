@@ -1,15 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- Isso aqui define que estamos usando HTML5 e que o conteúdo do site está em inglês. Se fosse para português, seria "pt-br". -->
 <head>
     <meta charset="UTF-8">
+    <!-- O charset UTF-8 garante que o site exiba corretamente qualquer caractere especial, como letras com acento ou símbolos. Muito útil para garantir que tudo apareça direitinho. -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- Essa meta tag é importante para garantir que o site funcione bem mesmo em navegadores antigos, especialmente no Internet Explorer. -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Aqui a gente faz com que o site seja responsivo, ou seja, ele vai se ajustar automaticamente ao tamanho da tela do dispositivo, seja um celular, tablet ou computador. -->
     <title>Formulário FAESA</title>
+    <!-- Esse título é o que aparece na aba do navegador quando a página é aberta. No caso, vai aparecer "Formulário FAESA". -->
+    
     <style>
         body{
             font-family: Arial, Helvetica, sans-serif;
             background-image: linear-gradient(to right, rgb(20, 147, 220), rgb(17, 54, 71));
         }
+        /* Aqui estamos aplicando estilo ao corpo da página. A fonte vai ser Arial (ou Helvetica se Arial não estiver disponível). 
+           O fundo vai ter um gradiente de azul claro para um azul mais escuro. Visualmente fica bem suave e agradável. */
+
         .box{
             color: white;
             position: absolute;
@@ -21,9 +30,16 @@
             border-radius: 15px;
             width: 20%;
         }
+        /* Esse estilo define a "caixa" do formulário. Ela vai ficar centralizada tanto vertical quanto horizontalmente graças à 
+           combinação do position absolute com transform. O fundo é semi-transparente (rgba) para dar aquele efeito de destaque
+           no formulário. E as bordas arredondadas dão um visual mais moderno. */
+
         fieldset{
             border: 3px solid dodgerblue;
         }
+        /* O fieldset é aquele contorno ao redor do formulário. Aqui estamos dizendo que ele terá uma borda azul ("dodgerblue") e 
+           com uma espessura de 3 pixels, dando destaque. */
+
         legend{
             border: 1px solid dodgerblue;
             padding: 10px;
@@ -31,9 +47,14 @@
             background-color: dodgerblue;
             border-radius: 8px;
         }
+        /* O legend é o título que aparece dentro do fieldset. Aqui ele recebe uma borda e fundo azul, com texto centralizado 
+           e bordas levemente arredondadas. Basicamente, ele é o cabeçalho que apresenta o formulário. */
+
         .inputBox{
             position: relative;
         }
+        /* Essa classe é usada para agrupar os campos de input e seus respectivos rótulos. A posição relativa ajuda no posicionamento dos elementos internos. */
+
         .inputUser{
             background: none;
             border: none;
@@ -44,6 +65,9 @@
             width: 100%;
             letter-spacing: 2px;
         }
+        /* Aqui estamos estilizando os campos de texto (input) do formulário. Eles não têm uma borda visível, exceto a linha inferior 
+           que é branca, e ao ser clicado, a cor do texto é branca. O espaçamento entre as letras também é ajustado (letter-spacing). */
+
         .labelInput{
             position: absolute;
             top: 0px;
@@ -51,12 +75,18 @@
             pointer-events: none;
             transition: .5s;
         }
+        /* Esse é o estilo dos rótulos (labels) dos inputs. Eles são posicionados acima dos campos de input, mas flutuam 
+           para cima quando o usuário clica no campo. A transição suave (0.5s) faz a animação parecer fluida. */
+
         .inputUser:focus ~ .labelInput,
         .inputUser:valid ~ .labelInput{
             top: -20px;
             font-size: 12px;
             color: dodgerblue;
         }
+        /* Aqui, quando o usuário clica no input ou quando o campo já está preenchido corretamente (valid), 
+           o label sobe e fica menor, mudando também para azul. Isso dá aquele efeito bacana de movimentação do texto. */
+
         #data_nascimento{
             border: none;
             padding: 8px;
@@ -64,6 +94,8 @@
             outline: none;
             font-size: 15px;
         }
+        /* Esse estilo é específico para o campo de data. Ele não tem bordas visíveis, mas é levemente arredondado para ter um visual moderno. */
+
         #submit{
             background-image: linear-gradient(to right,rgb(0, 92, 197), rgb(90, 20, 220));
             width: 100%;
@@ -74,32 +106,54 @@
             cursor: pointer;
             border-radius: 10px;
         }
+        /* Aqui estamos estilizando o botão de enviar (submit). Ele tem um fundo em gradiente azul, sem bordas, 
+           com um texto branco e bordas arredondadas. O botão também é responsivo, ocupando 100% da largura. */
+
         #submit:hover{
             background-image: linear-gradient(to right,rgb(0, 80, 172), rgb(80, 19, 195));
         }
+        /* Quando o usuário passa o mouse sobre o botão, a cor do gradiente escurece um pouco, dando aquele efeito de destaque. */
     </style>
 </head>
 <body>
     <div class="box">
+        <!-- Essa div é a caixa que contém o formulário e a estilizamos para ficar centralizada na tela. -->
+
         <form action="processa_formulario.php" method="POST">
+            <!-- O formulário vai enviar os dados para um arquivo chamado "processa_formulario.php" usando o método POST. 
+                 Isso significa que as informações não ficam visíveis na URL (diferente do método GET). -->
+
             <fieldset>
-                <legend><b>Fórmulário de Clientes</b></legend>
+                <!-- O fieldset agrupa todos os campos do formulário e desenha uma borda ao redor deles. -->
+                <legend><b>Fórmulário</b></legend>
+                <!-- O legend é o título do formulário que aparece dentro do fieldset. -->
+
                 <br>
                 <div class="inputBox">
                     <input type="text" name="nome" id="nome" class="inputUser" required>
+                    <!-- Campo de input para o nome completo. O "required" garante que o usuário não pode enviar o formulário sem preencher esse campo. -->
                     <label for="nome" class="labelInput">Nome completo</label>
+                    <!-- Label do campo "Nome completo". Ele flutua quando o campo é preenchido. -->
                 </div>
                 <br><br>
+
                 <div class="inputBox">
                     <input type="text" name="email" id="email" class="inputUser" required>
+                    <!-- Campo para o email. Também é obrigatório. -->
                     <label for="email" class="labelInput">Email</label>
+                    <!-- Label que flutua quando o campo de email é preenchido. -->
                 </div>
                 <br><br>
+
                 <div class="inputBox">
                     <input type="tel" name="telefone" id="telefone" class="inputUser" required>
+                    <!-- Campo para o telefone. O tipo "tel" indica que o campo espera um número de telefone. -->
                     <label for="telefone" class="labelInput">Telefone</label>
+                    <!-- Label para o telefone. -->
                 </div>
+                
                 <p>Sexo:</p>
+                <!-- Aqui temos as opções de gênero, onde o usuário pode escolher entre feminino, masculino ou outro. -->
                 <input type="radio" id="feminino" name="genero" value="feminino" required>
                 <label for="feminino">Feminino</label>
                 <br>
@@ -109,25 +163,38 @@
                 <input type="radio" id="outro" name="genero" value="outro" required>
                 <label for="outro">Outro</label>
                 <br><br>
+
                 <label for="data_nascimento"><b>Data de Nascimento:</b></label>
+                <!-- Campo para a data de nascimento. O tipo "date" faz com que apareça um calendário para facilitar a escolha da data. -->
                 <input type="date" name="data_nascimento" id="data_nascimento" required>
                 <br><br><br>
+
                 <div class="inputBox">
                     <input type="text" name="cidade" id="cidade" class="inputUser" required>
+                    <!-- Campo para a cidade. Também é obrigatório. -->
                     <label for="cidade" class="labelInput">Cidade</label>
+                    <!-- Label para o campo cidade. -->
                 </div>
                 <br><br>
+
                 <div class="inputBox">
                     <input type="text" name="estado" id="estado" class="inputUser" required>
+                    <!-- Campo para o estado. -->
                     <label for="estado" class="labelInput">Estado</label>
+                    <!-- Label para o campo estado. -->
                 </div>
                 <br><br>
+
                 <div class="inputBox">
                     <input type="text" name="endereco" id="endereco" class="inputUser" required>
+                    <!-- Campo para o endereço completo do usuário. -->
                     <label for="endereco" class="labelInput">Endereço</label>
+                    <!-- Label do campo endereço. -->
                 </div>
                 <br><br>
+
                 <input type="submit" name="submit" id="submit">
+                <!-- Botão de envio do formulário. Ao ser clicado, ele envia as informações para "processa_formulario.php". -->
             </fieldset>
         </form>
     </div>
