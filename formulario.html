@@ -15,7 +15,7 @@
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
-            background-image: linear-gradient(to right, rgb(20, 147, 220), rgb(17, 54, 71));
+            background-image: linear-gradient(to right, rgb(20, 147, 220), rgb(17, 54, 71));      
         }
 
         /* Aqui estamos aplicando estilo ao corpo da página. A fonte vai ser Arial (ou Helvetica se Arial não estiver disponível). 
@@ -24,13 +24,13 @@
         .box {
             color: white;
             position: absolute;
-            top: 70%;
+            top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             background-color: rgba(0, 0, 0, 0.6);
             padding: 15px;
             border-radius: 30px;
-            width: 60%;
+            width: 40%;
         }
 
         /* Esse estilo define a "caixa" do formulário. Ela vai ficar centralizada tanto vertical quanto horizontalmente graças à 
@@ -126,6 +126,54 @@
         }
 
         /* Quando o usuário passa o mouse sobre o botão, a cor do gradiente escurece um pouco, dando aquele efeito de destaque. */
+
+	.mensagemBox {
+
+      	display: flex;
+      	flex-direction: column;
+      	align-items: center;
+      	width: 100%;
+      	padding 10px;
+      
+     }
+      
+      /* Estilizar a Caixa de Mensagem */
+      
+     .labelMensagem {
+      	text-align: center;
+      	width: 100%;
+      	display: flex;
+      	flex-direction: column;
+      	align-items: center;
+      }
+      
+      /* Centralizar o titulo Mensagem */
+      
+      .inputMensagem {
+      	
+      	background: none;
+      	border: 1px solid white;
+      	outline: none;
+      	color: white;
+      	font-size: 15px;
+      	width: 80%;
+      	heigth: 200px;
+      	padding: 10px;
+      	border-radius: 5px;
+      	resize: none; 
+     	margin-top: 10px;
+      
+      }
+
+	/* Estilo para "Mensagem */
+      
+      .minhaImg {
+      	width: 300px;
+      	height: auto;
+      
+      }
+   
+  
     </style>
 </head>
 
@@ -143,6 +191,8 @@
                 <!-- O legend é o título do formulário que aparece dentro do fieldset. -->
 
                 <br>
+                  <img src="https://pontoooh.com.br/wp-content/uploads/2018/01/faesa.png" alt="Logo Faesa" class="minhaImg" />
+                  
                 <div class="inputBox">
                     <input type="text" name="nome" id="nome" class="inputUser" required>
                     <!-- Campo de input para o nome completo. O "required" garante que o usuário não pode enviar o formulário sem preencher esse campo. -->
@@ -206,8 +256,14 @@
                     <!-- Label do campo endereço. -->
                 </div>
                 <br><br>
+			<div class="inputBox mensagemBox">
+                <label for="mensagem" class="labelMensagem">Mensagem</label>
+                <textarea name="mensagem" id="mensagem" class="inputMensagem" rows="5" required></textarea>
+                  </div>
+              	 <br><br>
 
                 <input type="submit" name="submit" id="submit">
+				
                 <!-- Botão de envio do formulário. Ao ser clicado, ele envia as informações para "processa_formulario.php". -->
             </fieldset>
         </form>
