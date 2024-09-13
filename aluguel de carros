@@ -11,7 +11,7 @@ CREATE TABLE Carro (
     Cor VARCHAR(15),
     Modelo VARCHAR(20),
     Ano INT,
-    Diaria FLOAT -- Changed DOUBLE to FLOAT
+    Diaria DOUBLE
 );
 
 CREATE TABLE Aluga (
@@ -21,7 +21,7 @@ CREATE TABLE Aluga (
     CodCar INT,
     CodCli INT,
     FOREIGN KEY (CodCar) REFERENCES Carro(CodCar),
-    FOREIGN KEY (CodCli) REFERENCES Cliente(Codcli) -- Corrected the casing for consistency
+    FOREIGN KEY (CodCli) REFERENCES Cliente(Codcli)
 );
 
 CREATE TABLE Telefone (
@@ -32,7 +32,7 @@ CREATE TABLE Telefone (
 );
 
 CREATE TABLE Esportivo (
-    Velocidade FLOAT, -- Changed DOUBLE to FLOAT
+    Velocidade DOUBLE,
     CodCar INT,
     FOREIGN KEY (CodCar) REFERENCES Carro(CodCar)
 );
@@ -100,14 +100,14 @@ CREATE TABLE Seda (
           
           INSERT INTO Aluga (CodAlu, Data_inicial, Data_final, CodCar, CodCli)
             VALUES
-              (1, '10/01/2020', '15/01/2020', 1, 1),
-              (2, '05/02/2020', '10/02/2020', 6, 2),
-              (3, '01/03/2020', '07/03/2020', 3, 3),
-              (4, '10/04/2020', '12/04/2020', 8, 4),
-              (5, '15/05/2020', '20/05/2020', 2, 5),
-              (6, '05/06/2020', '12/06/2020', 7, 6),
-              (7, '01/07/2020', '07/07/2020', 5, 7),
-              (8, '10/08/2020', '15/08/2020', 9, 8),
-              (9, '15/09/2020', '20/09/2020', 10, 9),
-              (10, '01/10/2020', '07/10/2020', 4, 10);
+              (1, '2020-01-10', '2020-01-15', 1, 1),
+              (2, '2020-02-05', '2020-02-10', 6, 2),
+              (3, '2020-03-01', '2020-03-07', 3, 3),
+              (4, '2020-04-10', '2020-04-12', 8, 4),
+              (5, '2020-05-15', '2020-05-20', 2, 5),
+              (6, '2020-06-05', '2020-06-12', 7, 6),
+              (7, '2020-07-01', '2020-07-07', 5, 7),
+              (8, '2020-08-10', '2020-08-15', 9, 8),
+              (9, '2020-09-15', '2020-09-20', 10, 9),
+              (10, '2020-10-01', '2020-10-07', 4, 10);
   
