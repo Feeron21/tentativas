@@ -1,26 +1,79 @@
-<!DOCTYPE html>
-<html lang="en">
-<!-- Isso aqui define que estamos usando HTML5 e que o conteúdo do site está em inglês. Se fosse para português, seria "pt-br". -->
+<?php
+// Inicializa variáveis para armazenar mensagens de erro
+    $emailError = '';
+    $telefoneError = '';
+    $mensagemError = '';
 
-<head>
-    <meta charset="UTF-8">
-    <!-- O charset UTF-8 garante que o site exiba corretamente qualquer caractere especial, como letras com acento ou símbolos. Muito útil para garantir que tudo apareça direitinho. -->
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <!-- Essa meta tag é importante para garantir que o site funcione bem mesmo em navegadores antigos, especialmente no Internet Explorer. -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Aqui a gente faz com que o site seja responsivo, ou seja, ele vai se ajustar automaticamente ao tamanho da tela do dispositivo, seja um celular, tablet ou computador. -->
-    <title>Formulário FAESA</title>
-    <!-- Esse título é o que aparece na aba do navegador quando a página é aberta. No caso, vai aparecer "Formulário FAESA". -->
+    // Verifica se o formulário foi enviado
+    if (isset($_POST['submit'])) {
+        // Coleta os dados do formulário
+        $nome = $_POST['nome'];
+        $email = $_POST['email'];
+        $telefone = $_POST['telefone'];
+        $sexo = $_POST['genero'];
+        $data_nasc = $_POST['data_nascimento'];
+        $cidade = $_POST['cidade'];
+        $estado = $_POST['estado'];
+        $endereco = $_POST['endereco'];
+        $mensagem = $_POST['mensagem'];
 
-    <style>
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            background-image: linear-gradient(to right, rgb(20, 147, 220), rgb(17, 54, 71));      
+        // Validação do e-mail
+        // Verifica se o e-mail tem um formato válido
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            // Se o e-mail for inválido, define uma mensagem de erro
+            $emailError = 'Formato de e-mail inválido!';
         }
 
-        /* Aqui estamos aplicando estilo ao corpo da página. A fonte vai ser Arial (ou Helvetica se Arial não estiver disponível). 
-           O fundo vai ter um gradiente de azul claro para um azul mais escuro. Visualmente fica bem suave e agradável. */
+        // Validação do telefone
+        // Define um padrão para o telefone brasileiro
+        $telefonePattern = '/^\(\d{2}\) \d{4,5}-\d{4}$/';
+        if (!preg_match($telefonePattern, $telefone)) {
+            // Se o telefone for inválido, define uma mensagem de erro
+            $telefoneError = 'Formato de telefone inválido!';
+        }
 
+        // Validação da mensagem
+        // Verifica se a mensagem tem pelo menos 10 caracteres
+        if (strlen($mensagem) < 10) {
+            // Se a mensagem for muito curta, define uma mensagem de erro
+            $mensagemError = 'A mensagem deve conter pelo menos 10 caracteres.';
+        }
+
+        // Se não houver erros, insere os dados no banco
+        if (!$emailError && !$telefoneError && !$mensagemError) {
+            include_once('config.php'); // Inclui o arquivo de configuração do banco de dados
+             // Insere os dados no banco de dados
+            $result = mysqli_query($conexao, "INSERT INTO usuarios(nome,email,telefone,sexo,data_nasc,cidade,estado,endereco,mensagem) 
+            VALUES('$nome','$email','$telefone','$sexo','$data_nasc','$cidade','$estado','$endereco','$mensagem')");
+
+            // Configurações para evitar cache
+            header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+            header("Cache-Control: post-check=0, pre-check=0", false);
+            header("Pragma: no-cache");
+
+            // Redireciona para a página do formulário
+            header('Location: formulario.php');
+            exit; 
+        }
+    }
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Define a codificação de caracteres e configurações da página -->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário FAESA</title>
+    <!-- Estilos CSS internos -->
+    <style>
+        /* Estilo do corpo da página */
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-image: linear-gradient(to right, rgb(20, 147, 220), rgb(17, 54, 71));
+        }
+
+         /* Estilo da caixa que contém o formulário */
         .box {
             color: white;
             position: absolute;
@@ -29,22 +82,17 @@
             transform: translate(-50%, -50%);
             background-color: rgba(0, 0, 0, 0.6);
             padding: 15px;
-            border-radius: 30px;
-            width: 40%;
+            border-radius: 15px;
+            width: 25%;
         }
 
-        /* Esse estilo define a "caixa" do formulário. Ela vai ficar centralizada tanto vertical quanto horizontalmente graças à 
-           combinação do position absolute com transform. O fundo é semi-transparente (rgba) para dar aquele efeito de destaque
-           no formulário. E as bordas arredondadas dão um visual mais moderno. */
-
+         /* Estilo para o contorno do formulário */
         fieldset {
             border: 3px solid dodgerblue;
-			border-radius: 20px;
+            border-radius: 15px;
         }
 
-        /* O fieldset é aquele contorno ao redor do formulário. Aqui estamos dizendo que ele terá uma borda azul ("dodgerblue") e 
-           com uma espessura de 3 pixels, dando destaque. */
-
+        /* Define o estilo para o título do formulário */
         legend {
             border: 1px solid dodgerblue;
             padding: 10px;
@@ -53,29 +101,24 @@
             border-radius: 8px;
         }
 
-        /* O legend é o título que aparece dentro do fieldset. Aqui ele recebe uma borda e fundo azul, com texto centralizado 
-           e bordas levemente arredondadas. Basicamente, ele é o cabeçalho que apresenta o formulário. */
-
+        /* Estiliza a caixa de input */
         .inputBox {
             position: relative;
         }
 
-        /* Essa classe é usada para agrupar os campos de input e seus respectivos rótulos. A posição relativa ajuda no posicionamento dos elementos internos. */
-
+        /* Define o estilo dos campos de entrada */
         .inputUser {
             background: none;
             border: none;
             border-bottom: 1px solid white;
-            outline: outline;
+            outline: none;
             color: white;
             font-size: 15px;
             width: 100%;
             letter-spacing: 1px;
         }
 
-        /* Aqui estamos estilizando os campos de texto (input) do formulário. Eles não têm uma borda visível, exceto a linha inferior 
-           que é branca, e ao ser clicado, a cor do texto é branca. O espaçamento entre as letras também é ajustado (letter-spacing). */
-
+        /* Define o estilo da label */
         .labelInput {
             position: absolute;
             top: 0px;
@@ -84,9 +127,7 @@
             transition: .5s;
         }
 
-        /* Esse é o estilo dos rótulos (labels) dos inputs. Eles são posicionados acima dos campos de input, mas flutuam 
-           para cima quando o usuário clica no campo. A transição suave (0.5s) faz a animação parecer fluida. */
-
+        /* Faz a label flutuar quando o campo está focado ou preenchido */
         .inputUser:focus~.labelInput,
         .inputUser:valid~.labelInput {
             top: -20px;
@@ -94,9 +135,7 @@
             color: dodgerblue;
         }
 
-        /* Aqui, quando o usuário clica no input ou quando o campo já está preenchido corretamente (valid), 
-           o label sobe e fica menor, mudando também para azul. Isso dá aquele efeito bacana de movimentação do texto. */
-
+        /* Estilo para o campo de data de nascimento */
         #data_nascimento {
             border: none;
             padding: 8px;
@@ -105,8 +144,7 @@
             font-size: 15px;
         }
 
-        /* Esse estilo é específico para o campo de data. Ele não tem bordas visíveis, mas é levemente arredondado para ter um visual moderno. */
-
+        /* Estilo para o botão de enviar */
         #submit {
             background-image: linear-gradient(to right, rgb(0, 92, 197), rgb(90, 20, 220));
             width: 100%;
@@ -115,159 +153,165 @@
             color: white;
             font-size: 15px;
             cursor: pointer;
-            border-radius: 20px;
+            border-radius: 15px;
         }
 
-        /* Aqui estamos estilizando o botão de enviar (submit). Ele tem um fundo em gradiente azul, sem bordas, 
-           com um texto branco e bordas arredondadas. O botão também é responsivo, ocupando 100% da largura. */
-
+        /* Estilo para o botão de enviar quando o mouse está sobre ele */
         #submit:hover {
             background-image: linear-gradient(to right, rgb(0, 80, 172), rgb(80, 19, 195));
         }
 
-        /* Quando o usuário passa o mouse sobre o botão, a cor do gradiente escurece um pouco, dando aquele efeito de destaque. */
+        /* Estiliza a logo FAESA*/
+        .logoFaesa {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+            top: -10px;
+        }
 
-	.mensagemBox {
+        /* Estiliza a caixa de mensagem */
+        .mensagemBox {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            padding: 10px;
+        }
 
-      	display: flex;
-      	flex-direction: column;
-      	align-items: center;
-      	width: 100%;
-      	padding 10px;
-      
-     }
-      
-      /* Estilizar a Caixa de Mensagem */
-      
-     .labelMensagem {
-      	text-align: center;
-      	width: 100%;
-      	display: flex;
-      	flex-direction: column;
-      	align-items: center;
-      }
-      
-      /* Centralizar o titulo Mensagem */
-      
-      .inputMensagem {
-      	
-      	background: none;
-      	border: 1px solid white;
-      	outline: none;
-      	color: white;
-      	font-size: 15px;
-      	width: 80%;
-      	heigth: 200px;
-      	padding: 10px;
-      	border-radius: 5px;
-      	resize: none; 
-     	margin-top: 10px;
-      
-      }
+        /* Estiliza a label da mensagem */
+        .labelMensagem {
+            text-align: center;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-	/* Estilo para "Mensagem */
-      
-      .minhaImg {
-      	width: 300px;
-      	height: auto;
-      
-      }
-   
-  
+        /* Estiliza o campo de texto da mensagem */
+        .inputMensagem {
+            background: none;
+            border: 1px solid white;
+            outline: none;
+            color: white;
+            font-size: 15px;
+            width: 80%;
+            height: 100px;
+            padding: 10px;
+            border-radius: 5px;
+            resize: none;
+            margin-top: 10px;
+        }
+
+        /* Estilo para o texto de aviso de erros ou formatos */
+        .form-text {
+            color: #ccc;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
     </style>
 </head>
-
 <body>
+    <!-- Caixa que contém o formulário -->
     <div class="box">
-        <!-- Essa div é a caixa que contém o formulário e a estilizamos para ficar centralizada na tela. -->
-
-        <form action="processa_formulario.php" method="POST">
-            <!-- O formulário vai enviar os dados para um arquivo chamado "processa_formulario.php" usando o método POST. 
-                 Isso significa que as informações não ficam visíveis na URL (diferente do método GET). -->
-
+        <!-- Formulário que envia os dados para 'formulario.php' via método POST -->
+        <form action="formulario.php" method="POST">
             <fieldset>
-                <!-- O fieldset agrupa todos os campos do formulário e desenha uma borda ao redor deles. -->
+                <!-- Título do formulário -->
                 <legend><b>Fórmulário</b></legend>
-                <!-- O legend é o título do formulário que aparece dentro do fieldset. -->
-
                 <br>
-                  <img src="https://pontoooh.com.br/wp-content/uploads/2018/01/faesa.png" alt="Logo Faesa" class="minhaImg" />
-                  
+                <div>
+                    <!-- Imagem do logotipo FAESA -->
+                    <img src="img/EAD_FAESA_branco.webp" alt="Logo FAESA" class="logoFaesa">
+                </div>
+                <!-- Campo para o nome completo -->
                 <div class="inputBox">
-                    <input type="text" name="nome" id="nome" class="inputUser" required>
-                    <!-- Campo de input para o nome completo. O "required" garante que o usuário não pode enviar o formulário sem preencher esse campo. -->
+                    <input type="text" name="nome" id="nome" class="inputUser" value="<?php echo htmlspecialchars($_POST['nome'] ?? ''); ?>" required>
                     <label for="nome" class="labelInput">Nome completo</label>
-                    <!-- Label do campo "Nome completo". Ele flutua quando o campo é preenchido. -->
                 </div>
                 <br><br>
-
+                <!-- Campo para o e-mail -->
                 <div class="inputBox">
-                    <input type="text" name="email" id="email" class="inputUser" required>
-                    <!-- Campo para o email. Também é obrigatório. -->
+                    <input type="text" name="email" id="email" class="inputUser" value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>" required>
                     <label for="email" class="labelInput">Email</label>
-                    <!-- Label que flutua quando o campo de email é preenchido. -->
+                    <div class="form-text">
+                        <!-- Exibe mensagem de erro se o e-mail for inválido -->
+                        <?php if ($emailError): ?>
+                            <small><?php echo htmlspecialchars($emailError); ?></small>
+                        <?php endif; ?>
+                    </div>
                 </div>
                 <br><br>
-
+                 <!-- Campo para o telefone -->
                 <div class="inputBox">
-                    <input type="tel" name="telefone" id="telefone" class="inputUser" required>
-                    <!-- Campo para o telefone. O tipo "tel" indica que o campo espera um número de telefone. -->
+                    <input type="tel" name="telefone" id="telefone" class="inputUser" value="<?php echo htmlspecialchars($_POST['telefone'] ?? ''); ?>" required>
                     <label for="telefone" class="labelInput">Telefone</label>
-                    <!-- Label para o telefone. -->
+                    <div class="form-text">
+                        <!-- Exibe mensagem de erro se o telefone for inválido -->
+                        <?php if ($telefoneError): ?>
+                            <small><?php echo htmlspecialchars($telefoneError); ?></small>
+                        <?php endif; ?>
+                        <!-- Instrução sobre o formato do telefone -->
+                        <small>Formato: (99) 9999-9999 ou (99) 99999-9999</small>
+                    </div>
                 </div>
-
+                
+                <!-- Campo para o gênero -->
                 <p>Sexo:</p>
-                <!-- Aqui temos as opções de gênero, onde o usuário pode escolher entre feminino, masculino ou outro. -->
-                <input type="radio" id="feminino" name="genero" value="feminino" required>
+                <input type="radio" id="feminino" name="genero" value="feminino" <?php echo (isset($_POST['genero']) && $_POST['genero'] == 'feminino') ? 'checked' : ''; ?> required>
                 <label for="feminino">Feminino</label>
                 <br>
-                <input type="radio" id="masculino" name="genero" value="masculino" required>
+                <input type="radio" id="masculino" name="genero" value="masculino" <?php echo (isset($_POST['genero']) && $_POST['genero'] == 'masculino') ? 'checked' : ''; ?> required>
                 <label for="masculino">Masculino</label>
                 <br>
-                <input type="radio" id="outro" name="genero" value="outro" required>
+                <input type="radio" id="outro" name="genero" value="outro" <?php echo (isset($_POST['genero']) && $_POST['genero'] == 'outro') ? 'checked' : ''; ?> required>
                 <label for="outro">Outro</label>
                 <br><br>
 
+                <!-- Campo para a data de nascimento -->
                 <label for="data_nascimento"><b>Data de Nascimento:</b></label>
-                <!-- Campo para a data de nascimento. O tipo "date" faz com que apareça um calendário para facilitar a escolha da data. -->
-                <input type="date" name="data_nascimento" id="data_nascimento" required>
+                <input type="date" name="data_nascimento" id="data_nascimento" value="<?php echo htmlspecialchars($_POST['data_nascimento'] ?? ''); ?>" required>
                 <br><br><br>
 
+                <!-- Campo para a cidade -->
                 <div class="inputBox">
-                    <input type="text" name="cidade" id="cidade" class="inputUser" required>
-                    <!-- Campo para a cidade. Também é obrigatório. -->
+                    <input type="text" name="cidade" id="cidade" class="inputUser" value="<?php echo htmlspecialchars($_POST['cidade'] ?? ''); ?>" required>
                     <label for="cidade" class="labelInput">Cidade</label>
-                    <!-- Label para o campo cidade. -->
                 </div>
                 <br><br>
 
+                <!-- Campo para o estado -->
                 <div class="inputBox">
-                    <input type="text" name="estado" id="estado" class="inputUser" required>
-                    <!-- Campo para o estado. -->
+                    <input type="text" name="estado" id="estado" class="inputUser" value="<?php echo htmlspecialchars($_POST['estado'] ?? ''); ?>" required>
                     <label for="estado" class="labelInput">Estado</label>
-                    <!-- Label para o campo estado. -->
                 </div>
                 <br><br>
 
+                <!-- Campo para o endereço -->
                 <div class="inputBox">
-                    <input type="text" name="endereco" id="endereco" class="inputUser" required>
-                    <!-- Campo para o endereço completo do usuário. -->
+                    <input type="text" name="endereco" id="endereco" class="inputUser" value="<?php echo htmlspecialchars($_POST['endereco'] ?? ''); ?>" required>
                     <label for="endereco" class="labelInput">Endereço</label>
-                    <!-- Label do campo endereço. -->
                 </div>
                 <br><br>
-			<div class="inputBox mensagemBox">
-                <label for="mensagem" class="labelMensagem">Mensagem</label>
-                <textarea name="mensagem" id="mensagem" class="inputMensagem" rows="5" required></textarea>
-                  </div>
-              	 <br><br>
 
-                <input type="submit" name="submit" id="submit">
-				
-                <!-- Botão de envio do formulário. Ao ser clicado, ele envia as informações para "processa_formulario.php". -->
+                <!-- Campo para a caixa de Mensagem -->
+                <div class="inputBox mensagemBox">
+                    <label for="mensagem" class="labelMensagem">Mensagem</label>
+                    <textarea name="mensagem" id="mensagem" class="inputMensagem" rows="10" minlength="10" required><?php echo htmlspecialchars($_POST['mensagem'] ?? ''); ?></textarea>
+                    <div class="form-text">
+                         <!-- Exibe mensagem de erro se a mensagem for muito curta -->
+                        <?php if ($mensagemError): ?>
+                            <small><?php echo htmlspecialchars($mensagemError); ?></small>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <br><br>
+
+                <!-- Botão para enviar o formulário -->
+                <input type="submit" name="submit" id="submit" value="Enviar Formulário">
             </fieldset>
         </form>
     </div>
 </body>
-
 </html>
