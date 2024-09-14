@@ -45,10 +45,10 @@ CREATE TABLE Seda (
 
       INSERT INTO Cliente(Codcli, Nome, CNH, Endereco) 
         VALUES 
-            (1, 'Ricardo Souza', '12345678901', 'Rua das Flores, 45, São Paulo, SP'),
+            (1, 'Ricardo Souza', '12345678901', 'Rua Desembargador Ferreira Coelho, 315, Praia do Canto, Vitória, ES'),
             (2, 'Maria Fernanda', '23456789012', 'Av. Brasil, 123, Rio de Janeiro, RJ'),
             (3, 'Carlos Eduardo', '34567890123', 'Rua dos Anjos, 77, Belo Horizonte, MG'),
-            (4, 'Ana Carolina', '45678901234', 'Av. Paulista, 1000, São Paulo, SP'),
+            (4, 'Ana Carolina', '45678901234', 'Avenida Américo Buaiz, 965, Enseada do Suá, Vitória, ES'),
             (5, 'Paulo Roberto', '56789012345', 'Rua do Porto, 15, Campinas, SP'),
             (6, 'Lucas Antônio', '67890123456', 'Rua Santa Clara, 200, Rio de Janeiro, RJ'),
             (7, 'Mariana Aparecida', '78901234567', 'Av. Sete de Setembro, 400, Curitiba, PR'),
@@ -58,10 +58,10 @@ CREATE TABLE Seda (
           
       INSERT INTO Telefone (Telefone_PK, Telefone, CodCli_FK)
         VALUES
-            (1, '(11) 98877-6655', 1),
+            (1, '(27) 99965-4321', 1),
             (2, '(21) 98765-4321', 2),
             (3, '(31) 99876-5432', 3),
-            (4, '(11) 91234-5678', 4),
+            (4, '(27) 99876-5432', 4),
             (5, '(19) 98456-7890', 5),
             (6, '(21) 97765-4321', 6),
             (7, '(41) 98888-9999', 7),
@@ -100,7 +100,7 @@ CREATE TABLE Seda (
           
           INSERT INTO Aluga (CodAlu, Data_inicial, Data_final, CodCar, CodCli)
             VALUES
-              (1, '2020-01-10', '2020-01-15', 1, 1),
+              (1, '2020-05-17', '2020-05-22', 1, 1),
               (2, '2020-02-05', '2020-02-10', 6, 2),
               (3, '2020-03-01', '2020-03-07', 3, 3),
               (4, '2020-04-10', '2020-04-12', 8, 4),
@@ -109,5 +109,15 @@ CREATE TABLE Seda (
               (7, '2020-07-01', '2020-07-07', 5, 7),
               (8, '2020-08-10', '2020-08-15', 9, 8),
               (9, '2020-09-15', '2020-09-20', 10, 9),
-              (10, '2020-10-01', '2020-10-07', 4, 10);
+              (10, '2020-10-01', '2020-10-07', 4, 10),
+                (11, '2020-01-10', '2020-01-15', 10, 1),
+                (12, '2020-03-01', '2020-03-07', 2, 1),
+                (13, '2020-05-01', '2020-05-10', 3, 1),
+                (14, '2020-05-17', '2020-05-23', 4, 2),
+                (15, '2020-05-17', '2020-05-25', 5, 3),
+                (16, '2020-06-01', '2020-06-07', 6, 3),
+                (17, '2020-05-17', '2020-05-30', 7, 4),
+                (18, '2020-09-01', '2020-09-10', 9, 4),
+                (19, '2020-05-17', '2020-05-27', 8, 5);
+            
   
