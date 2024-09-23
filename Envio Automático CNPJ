@@ -1,0 +1,348 @@
+import ttkbootstrap as ttk
+from ttkbootstrap.constants import *
+from ttkbootstrap.tooltip import ToolTip
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
+import time
+import sys
+import re
+import threading
+
+# URL of the site
+url = 'https://portaldocliente.motociclo.com.br/entrar'
+
+# Global variables to control execution
+running = False
+paused = False
+last_cnpj_sent = ""
+
+def fechar_popup(driver):
+    try:
+        wait = WebDriverWait(driver, 10)
+        pop_up_close_button = wait.until(EC.element_to_be_clickable((By.XPATH, '//button[@class="popup-close"]')))
+        pop_up_close_button.click()
+        print("Pop-up fechado com sucesso.")
+    except TimeoutException:
+        print("Nenhum pop-up encontrado ou erro ao fechar o pop-up.")
+
+def automatizar_cnpj(cnpj):
+    driver = webdriver.Chrome()
+    driver.get(url)
+    try:
+        fechar_popup(driver)
+        wait = WebDriverWait(driver, 10)
+        input_cnpj = wait.until(EC.visibility_of_element_located((By.NAME, 'cnpj')))
+        input_cnpj.send_keys(cnpj)
+        botao_aparecer = wait.until(EC.element_to_be_clickable((By.XPATH, '//button[contains(text(), "Aceito")]')))
+        botao_aparecer.click()
+        botao_enviar = wait.until(EC.element_to_be_clickable((By.XPATH, '//button[contains(text(), "Avançar")]')))
+        botao_enviar.click()
+        
+        # Check for "Cliente não existente" error
+        try:
+            error_message = WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located((By.XPATH, "//div[contains(text(), 'Cliente não existente')]"))
+            )
+            return False, "Cliente não existente"
+        except TimeoutException:
+            return True, "Sucesso"
+        
+    except TimeoutException as e:
+        print(f"Erro: {str(e)}. O elemento demorou para aparecer ou não está clicável.")
+        return False, "Timeout"
+    except Exception as e:
+        print(f"Ocorreu um erro ao processar o CNPJ {cnpj}: {str(e)}")
+        return False, str(e)
+    finally:
+        time.sleep(3)
+        driver.quit()
+
+def formatar_cnpj(cnpj):
+    cnpj = re.sub(r'\D', '', cnpj)
+    if len(cnpj) == 14:
+        return f"{cnpj[:2]}.{cnpj[2:5]}.{cnpj[5:8]}/{cnpj[8:12]}-{cnpj[12:]}"
+    return cnpj
+
+def validar_cnpj(cnpj):
+    return re.match(r'^\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}$', cnpj) is not None
+
+def processar_cnpjs():
+    global running, paused, last_cnpj_sent
+    running = True
+    cnpjs = text_cnpjs.get("1.0", "end").strip().split('\n')
+    if not cnpjs:
+        show_message("Por favor, insira pelo menos um CNPJ.", "Entrada Inválida", "warning")
+        running = False
+        janela.after(0, enable_buttons)
+        return
+
+    enviados_sucesso = []
+    erros = []
+    total = len(cnpjs)
+
+    for i, cnpj in enumerate(cnpjs, 1):
+        while paused:
+            time.sleep(0.1)
+        if not running:
+            break
+
+        cnpj = formatar_cnpj(cnpj.strip())
+        if validar_cnpj(cnpj):
+            success, message = automatizar_cnpj(cnpj)
+            if success:
+                enviados_sucesso.append(cnpj)
+                last_cnpj_sent = cnpj
+                janela.after(0, update_status, f"Enviando: {i}/{total} - Sucesso: {cnpj}")
+                janela.after(0, update_last_cnpj, f"Último CNPJ enviado: {cnpj}")
+            else:
+                erros.append(f"{cnpj} - {message}")
+                janela.after(0, update_status, f"Enviando: {i}/{total} - Erro: {cnpj} - {message}")
+        else:
+            erros.append(f"{cnpj} - Formato incorreto")
+            janela.after(0, update_status, f"Enviando: {i}/{total} - Formato inválido: {cnpj}")
+
+        progress = (i / total) * 100
+        janela.after(0, update_progress, progress)
+
+    mensagem_final = ""
+    if enviados_sucesso:
+        ultimo_cnpj = enviados_sucesso[-1]
+        mensagem_final += f"CNPJs enviados com sucesso: {len(enviados_sucesso)}\n"
+        mensagem_final += f"Último CNPJ enviado: {ultimo_cnpj}\n\n"
+    else:
+        mensagem_final += "Nenhum CNPJ foi enviado com sucesso.\n\n"
+
+    if erros:
+        mensagem_final += f"CNPJs com erro ({len(erros)}):\n"
+        mensagem_final += "\n".join(erros)
+
+    if not running:
+        mensagem_final = "Envio interrompido pelo usuário.\n\n" + mensagem_final
+
+    janela.after(0, show_confirmation, mensagem_final, "Relatório de Envio")
+    janela.after(0, update_status, "Envio concluído")
+    janela.after(0, enable_buttons)
+    running = False
+    paused = False
+
+def enviar_cnpjs():
+    disable_buttons()
+    update_status("Iniciando envio...")
+    update_progress(0)
+    threading.Thread(target=processar_cnpjs, daemon=True).start()
+
+def parar_processamento():
+    global running, paused
+    running = False
+    paused = False
+    update_status("Interrompendo envio...")
+    botao_parar.configure(state="disabled")
+    botao_pausar.configure(state="disabled")
+
+def pausar_retomar_processamento():
+    global paused
+    paused = not paused
+    if paused:
+        update_status("Envio pausado")
+        botao_pausar.configure(text="Retomar")
+    else:
+        update_status("Envio retomado")
+        botao_pausar.configure(text="Pausar")
+
+def show_message(message, title, msg_type):
+    if msg_type == "info":
+        ttk.dialogs.Messagebox.show_info(message, title)
+    elif msg_type == "error":
+        ttk.dialogs.Messagebox.show_error(message, title)
+    elif msg_type == "warning":
+        ttk.dialogs.Messagebox.show_warning(message, title)
+
+def show_confirmation(message, title):
+    confirm_window = ttk.Toplevel(janela)
+    confirm_window.title(title)
+    confirm_window.geometry("500x300")
+    confirm_window.attributes('-topmost', True)
+
+    frame = ttk.Frame(confirm_window, padding=20)
+    frame.pack(expand=True, fill="both")
+
+    text_widget = ttk.Text(frame, wrap="word", width=60, height=10)
+    text_widget.pack(expand=True, fill="both", pady=(0, 10))
+    text_widget.insert("1.0", message)
+    text_widget.configure(state="disabled")
+
+    scrollbar = ttk.Scrollbar(frame, orient="vertical", command=text_widget.yview)
+    scrollbar.pack(side="right", fill="y")
+    text_widget.configure(yscrollcommand=scrollbar.set)
+
+    ok_button = ttk.Button(frame, text="OK", command=confirm_window.destroy, width=10)
+    ok_button.pack()
+
+def sair():
+    janela.destroy()
+    sys.exit()
+
+def toggle_mode():
+    if janela.style.theme.name == "darkly":
+        janela.style.theme_use("litera")
+        toggle_button.configure(text="Modo Escuro")
+    else:
+        janela.style.theme_use("darkly")
+        toggle_button.configure(text="Modo Claro")
+    update_ui_colors()
+
+def update_ui_colors():
+    bg_color = janela.style.colors.get("bg")
+    fg_color = janela.style.colors.get("fg")
+    input_color = janela.style.colors.get("inputbg")
+    
+    main_frame.configure(style="TFrame")
+    text_cnpjs.configure(bg=input_color, fg=fg_color)
+    status_bar.configure(background=bg_color, foreground=fg_color)
+
+def limpar_cnpjs():
+    text_cnpjs.delete("1.0", "end")
+    update_progress(0)
+    update_status("CNPJs limpos")
+    update_last_cnpj("")
+    check_textbox_content()
+
+def update_status(message):
+    status_bar.configure(text=message)
+
+def update_progress(value):
+    progress_bar['value'] = value
+    progress_label.configure(text=f"{value:.1f}%")
+
+def update_last_cnpj(message):
+    last_cnpj_label.configure(text=message)
+
+def disable_buttons():
+    botao_enviar.configure(state="disabled")
+    botao_limpar.configure(state="disabled")
+    botao_parar.configure(state="normal")
+    botao_pausar.configure(state="normal")
+
+def enable_buttons():
+    botao_limpar.configure(state="normal")
+    botao_parar.configure(state="disabled")
+    botao_pausar.configure(state="disabled")
+    botao_pausar.configure(text="Pausar")
+    check_textbox_content()
+
+def check_textbox_content(event=None):
+    if text_cnpjs.get("1.0", "end").strip():
+        botao_enviar.configure(state="normal")
+    else:
+        botao_enviar.configure(state="disabled")
+
+def show_help():
+    help_text = """
+    Instruções de Uso:
+    1. Insira os CNPJs na caixa de texto, um por linha.
+    2. Clique em "Enviar CNPJs" para iniciar o processo.
+    3. Use os botões "Pausar" e "Parar" para controlar o envio.
+    4. O botão "Limpar" remove todos os CNPJs da caixa de texto.
+    5. Use o botão de alternância para mudar entre os modos claro e escuro.
+    """
+    show_message(help_text, "Ajuda", "info")
+
+def format_cnpj_input(event=None):
+    content = text_cnpjs.get("1.0", "end-1c")
+    lines = content.split('\n')
+    formatted_lines = []
+    for line in lines:
+        cnpj = re.sub(r'\D', '', line)
+        if len(cnpj) == 14:
+            formatted_cnpj = f"{cnpj[:2]}.{cnpj[2:5]}.{cnpj[5:8]}/{cnpj[8:12]}-{cnpj[12:]}"
+            formatted_lines.append(formatted_cnpj)
+        else:
+            formatted_lines.append(line)
+    formatted_content = '\n'.join(formatted_lines)
+    text_cnpjs.delete("1.0", "end")
+    text_cnpjs.insert("1.0", formatted_content)
+
+# UI Setup
+janela = ttk.Window(themename="darkly")
+janela.title("Envio Automático de CNPJs")
+janela.geometry("800x600")
+
+style = ttk.Style()
+
+# Main frame
+main_frame = ttk.Frame(janela, padding=20)
+main_frame.pack(fill="both", expand=True)
+
+# Title
+title_label = ttk.Label(main_frame, text="Envio Automático de CNPJs", font=("Helvetica", 24, "bold"))
+title_label.pack(pady=(0, 20))
+
+# CNPJs input
+label_cnpjs = ttk.Label(main_frame, text="Insira os CNPJs (um por linha):", font=("Helvetica", 14))
+label_cnpjs.pack(pady=(0, 5))
+
+text_cnpjs = ttk.Text(main_frame, height=10, width=50, font=("Helvetica", 12))
+text_cnpjs.pack(pady=(0, 10), fill="both", expand=True)
+text_cnpjs.bind("<KeyRelease>", check_textbox_content)
+text_cnpjs.bind("<FocusOut>", format_cnpj_input)
+
+# Buttons frame
+frame_botoes = ttk.Frame(main_frame)
+frame_botoes.pack(pady=10)
+
+botao_enviar = ttk.Button(frame_botoes, text="Enviar CNPJs", command=enviar_cnpjs, state="disabled", width=15)
+botao_enviar.pack(side="left", padx=5)
+ToolTip(botao_enviar, text="Iniciar o envio dos CNPJs")
+
+botao_pausar = ttk.Button(frame_botoes, text="Pausar", command=pausar_retomar_processamento, state="disabled", width=15)
+botao_pausar.pack(side="left", padx=5)
+ToolTip(botao_pausar, text="Pausar ou retomar o envio")
+
+botao_parar = ttk.Button(frame_botoes, text="Parar", command=parar_processamento, state="disabled", width=15)
+botao_parar.pack(side="left", padx=5)
+ToolTip(botao_parar, text="Interromper o envio")
+
+botao_limpar = ttk.Button(frame_botoes, text="Limpar", command=limpar_cnpjs, width=15)
+botao_limpar.pack(side="left", padx=5)
+ToolTip(botao_limpar, text="Limpar a lista de CNPJs")
+
+botao_sair = ttk.Button(frame_botoes, text="Sair", command=sair, width=15)
+botao_sair.pack(side="left", padx=5)
+ToolTip(botao_sair, text="Sair do programa")
+
+# Progress frame
+progress_frame = ttk.Frame(main_frame)
+progress_frame.pack(pady=10, fill="x")
+
+progress_bar = ttk.Progressbar(progress_frame, length=400, mode='determinate', style="info.Horizontal.TProgressbar")
+progress_bar.pack(expand=True)
+
+progress_label = ttk.Label(progress_frame, text="0.0%", font=("Helvetica", 12))
+progress_label.pack(pady=(5, 0))
+
+# Last CNPJ sent label
+last_cnpj_label = ttk.Label(main_frame, text="", font=("Helvetica", 12))
+last_cnpj_label.pack(pady=5)
+
+# Status bar
+status_bar = ttk.Label(main_frame, text="Pronto para enviar CNPJs", font=("Helvetica", 12))
+status_bar.pack(pady=10)
+
+# Toggle mode button
+toggle_button = ttk.Button(main_frame, text="Modo Claro", command=toggle_mode, width=15)
+toggle_button.pack(side="left", pady=10)
+ToolTip(toggle_button, text="Alternar entre modo claro e escuro")
+
+# Help button
+help_button = ttk.Button(main_frame, text="Ajuda", command=show_help, width=15)
+help_button.pack(side="right", pady=10)
+ToolTip(help_button, text="Exibir instruções de uso")
+
+# Update UI colors
+update_ui_colors()
+
+# Start the GUI loop
+janela.mainloop()
