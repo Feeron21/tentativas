@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QueFome! - Seu Delivery no Espírito Santo</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="/placeholder.svg?height=50&width=50" alt="Logo QueFome!" class="logo-img">
+            <h1>QueFome!</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#home">Início</a></li>
+                <li><a href="#categories">Categorias</a></li>
+                <li><a href="#promotions">Promoções</a></li>
+            </ul>
+        </nav>
+        <div class="search-bar">
+            <input type="text" id="search-input" placeholder="Temos de tudo!" aria-label="Buscar pratos ou produtos">
+            <button type="button" id="search-button" class="search-button">
+                <i data-lucide="search"></i>
+            </button>
+        </div>
+        <button class="cart-icon-button" id="cart-button">
+            <i data-lucide="shopping-cart"></i>
+            <span id="cart-count">0</span>
+        </button>
+    </header>
+
+    <main>
+        <section id="home" class="hero">
+            <h2>Mate sua fome a qualquer momento!</h2>
+            <p>Descubra sabores incríveis entregues na sua porta em todo o estado</p>
+            <a href="#categories" class="cta-button">Explorar Cardápio</a>
+        </section>
+
+        <section id="categories">
+            <h2>O que vai ser hoje?</h2>
+            <div class="category-grid" id="category-grid">
+                <!-- Categorias serão inseridas aqui dinamicamente via JavaScript -->
+            </div>
+        </section>
+
+        <section id="promotions">
+            <h2>Promoções Imperdíveis</h2>
+            <div class="promotion-grid" id="promotion-grid">
+                <!-- Promoções serão inseridas aqui dinamicamente via JavaScript -->
+            </div>
+        </section>
+
+        <section id="products">
+            <h2>Nossos Destaques</h2>
+            <div class="product-filters">
+                <button type="button" class="filter-button active" data-filter="all">Todos</button>
+                <button type="button" class="filter-button" data-filter="popular">Populares</button>
+                <button type="button" class="filter-button" data-filter="new">Novidades</button>
+            </div>
+            <div class="product-grid" id="product-grid">
+                <!-- Produtos serão inseridos aqui dinamicamente via JavaScript -->
+            </div>
+        </section>
+
+        <section id="cart" class="cart-sidebar">
+            <h2>Seu Pedido</h2>
+            <div class="cart-items" id="cart-items">
+                <!-- Itens do carrinho serão inseridos aqui dinamicamente via JavaScript -->
+            </div>
+            <div class="cart-total">
+                <p>Subtotal: R$ <span id="cart-subtotal">0,00</span></p>
+                <p>Taxa de entrega: R$ <span id="delivery-fee">0,00</span></p>
+                <p class="total">Total: R$ <span id="cart-total-value">0,00</span></p>
+            </div>
+            <button type="button" id="checkout-button" class="cta-button">Finalizar Pedido</button>
+        </section>
+
+        <div id="checkout-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Finalizar Pedido</h2>
+                <form id="checkout-form">
+                    <div class="form-group">
+                        <label for="name">Nome Completo:</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Telefone:</label>
+                        <input type="tel" id="phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cep">CEP:</label>
+                        <input type="text" id="cep" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Endereço:</label>
+                        <input type="text" id="address" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="house-number">Número da Casa:</label>
+                        <input type="text" id="house-number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="payment-method">Método de Pagamento:</label>
+                        <select id="payment-method" required>
+                            <option value="">Selecione...</option>
+                            <option value="Cartão de Crédito">Cartão de Crédito</option>
+                            <option value="Cartão de Débito">Cartão de Débito</option>
+                            <option value="Pix">Pix</option>
+                            <option value="Dinheiro">Dinheiro</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="cta-button">Confirmar Pedido</button>
+                </form>
+            </div>
+        </div>
+
+        <div id="order-confirmation" class="modal">
+            <div class="modal-content">
+                <h2>Pedido Confirmado!</h2>
+                <div id="order-details"></div>
+                <div id="estimated-delivery-time"></div>
+                <button id="close-confirmation" class="cta-button">Fechar</button>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Sobre o QueFome!</h3>
+                <p>Entregando felicidade em forma de comida por todo o Espírito Santo desde 2024.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Contato</h3>
+                <p>Email: contato@quefome.com</p>
+                <p>Telefone: (27) 1234-5678</p>
+            </div>
+            <div class="footer-section">
+                <h3>Áreas de Entrega</h3>
+                <p>Entregamos em todo o estado do Espírito Santo</p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 QueFome! - Espírito Santo - Brasil. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
